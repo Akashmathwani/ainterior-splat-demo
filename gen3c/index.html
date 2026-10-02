@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GEN3C living room</title>
+<style>
+  :root{--bg:#111;--fg:#e8e4dc;--muted:#a49d90;--panel:#000a}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,sans-serif;overflow:hidden}
+  #info{position:fixed;top:10px;left:10px;right:10px;max-width:520px;background:var(--panel);padding:10px 14px;border-radius:8px;z-index:10}
+  #info b{font-weight:600} #info p{margin:4px 0;color:var(--muted)}
+  #tabs{margin-top:8px;display:flex;gap:8px} #tabs button{background:#333;color:var(--fg);border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
+  #tabs button.on{background:#c9a36b;color:#111}
+  #video{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000}
+  #video video{max-width:100%;max-height:100%}
+</style></head><body>
+<div id="info"><b>Living room, GEN3C walkthrough (experiment)</b>
+  <p>Illustrative AI visual built on the traced plan's exact geometry. Not the sanctioned plan; furniture is invented by the AI restyle and is not a product.</p>
+  <p id="status">Loading splat…</p>
+  <div id="tabs"><button id="t3d" class="on">Walkable 3D</button><button id="tvid">Generated video</button></div>
+</div>
+<div id="video"><video src="./walk.mp4" controls loop muted playsinline></video></div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as GaussianSplats3D from 'https://cdn.jsdelivr.net/npm/@mkkellogg/gaussian-splats-3d@0.4.6/build/gaussian-splats-3d.module.js';
+const status = document.getElementById('status'), vid = document.getElementById('video');
+document.getElementById('t3d').onclick = (e) => { vid.style.display = 'none'; e.target.classList.add('on'); document.getElementById('tvid').classList.remove('on'); };
+document.getElementById('tvid').onclick = (e) => { vid.style.display = 'flex'; e.target.classList.add('on'); document.getElementById('t3d').classList.remove('on'); vid.querySelector('video').play(); };
+// Start where the generated walk starts (tour node n_living, facing the TV wall). Scene metres, y up.
+const viewer = new GaussianSplats3D.Viewer({
+  cameraUp: [0, 1, 0],
+  initialCameraPosition: [10.043, 1.5, 5.43],
+  initialCameraLookAt: [10.043, 1.5, 6.9],
+  sharedMemoryForWorkers: false,
+});
+viewer.addSplatScene('./living.ply', { splatAlphaRemovalThreshold: 5 })
+  .then(() => { viewer.start(); status.textContent = 'Drag to look around, scroll to move. Best within about a metre of the walked path.'; })
+  .catch((e) => { status.textContent = 'Failed to load: ' + e; });
+</script>
+</body></html>
